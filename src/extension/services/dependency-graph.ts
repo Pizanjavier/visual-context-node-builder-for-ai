@@ -2,23 +2,30 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import { scanImports } from './import-scanner';
 import { readFileAsNodeData } from './file-reader';
+import { loadPathConfig } from './path-resolver';
 import type { ContextFileNodeData } from '../../shared/types/nodes';
+import type { DependencyCategoryFilter } from '../../shared/types/dependency-categories';
+import { passesFilter } from '../../shared/utils/category-filter';
 
-const MAX_DEPTH = 3;
+const MAX_DEPTH = 1;
 const MAX_FILES = 500;
 
 /** BFS expansion of dependencies from a root file. */
 export async function expandDependencies(
   rootFilePath: string,
   existingPaths: Set<string>,
+  categoryFilter?: DependencyCategoryFilter,
 ): Promise<ContextFileNodeData[]> {
+  const pathConfig = loadPathConfig(
+    path.dirname(rootFilePath),
+    vscode.workspace.workspaceFolders?.[0]?.uri.fsPath,
+  );
   const visited = new Set<string>(existingPaths);
   visited.add(rootFilePath);
 
   const queue: Array<{ filePath: string; depth: number }> = [];
   const results: ContextFileNodeData[] = [];
 
-  // Seed queue with root file imports
   const rootContent = await readRawContent(rootFilePath);
   if (!rootContent) return results;
 
@@ -26,10 +33,11 @@ export async function expandDependencies(
     rootContent,
     path.basename(rootFilePath),
     path.dirname(rootFilePath),
+    pathConfig,
   );
 
   for (const imp of rootImports) {
-    if (!visited.has(imp.resolvedPath)) {
+    if (!visited.has(imp.resolvedPath) && matchesFilter(imp.resolvedPath, categoryFilter)) {
       visited.add(imp.resolvedPath);
       queue.push({ filePath: imp.resolvedPath, depth: 1 });
     }
@@ -50,12 +58,16 @@ export async function expandDependencies(
           nodeData.content,
           nodeData.fileName,
           path.dirname(item.filePath),
+          pathConfig,
         );
 
         for (const imp of imports) {
-          if (!visited.has(imp.resolvedPath)) {
+          if (!visited.has(imp.resolvedPath) && matchesFilter(imp.resolvedPath, categoryFilter)) {
             visited.add(imp.resolvedPath);
-            queue.push({ filePath: imp.resolvedPath, depth: item.depth + 1 });
+            queue.push({
+              filePath: imp.resolvedPath,
+              depth: item.depth + 1,
+            });
           }
         }
       }
@@ -68,7 +80,18 @@ export async function expandDependencies(
   return results;
 }
 
-async function readRawContent(filePath: string): Promise<string | undefined> {
+/** Check if a resolved path passes the category filter (if provided). */
+function matchesFilter(
+  filePath: string,
+  filter?: DependencyCategoryFilter,
+): boolean {
+  if (!filter) return true;
+  return passesFilter(filePath, filter);
+}
+
+async function readRawContent(
+  filePath: string,
+): Promise<string | undefined> {
   try {
     const uri = vscode.Uri.file(filePath);
     const raw = await vscode.workspace.fs.readFile(uri);

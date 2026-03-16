@@ -1,8 +1,10 @@
-import { memo, useCallback } from 'react';
+import { memo, useCallback, useState } from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import type { ContextFileNodeData } from '../../../shared/types/nodes';
 import { useCanvasStore } from '../../store/canvas-store';
+import { useDepFilterStore } from '../../store/dep-filter-store';
 import { useExtensionBridge } from '../../hooks/useExtensionBridge';
+import { DepFilterPopover } from './DepFilterPopover';
 import {
   nodeStyle,
   headerStyle,
@@ -32,16 +34,28 @@ export const ContextFileNode = memo(function ContextFileNode({
 }: Props): React.ReactElement {
   const updateNodeData = useCanvasStore((s) => s.updateNodeData);
   const removeNodes = useCanvasStore((s) => s.removeNodes);
+  const categoryFilter = useDepFilterStore((s) => s.filter);
   const { postMessage } = useExtensionBridge();
+  const [showFilter, setShowFilter] = useState(false);
 
-  const onExpandDeps = useCallback(() => {
+  const toggleFilterPopover = useCallback(() => {
     if (data.depsExpanded) {
       updateNodeData(id, { depsExpanded: false });
     } else {
-      postMessage({ type: 'expandDependencies', filePath: data.filePath, nodeId: id });
-      updateNodeData(id, { depsExpanded: true });
+      setShowFilter((prev) => !prev);
     }
-  }, [postMessage, data.filePath, data.depsExpanded, id, updateNodeData]);
+  }, [data.depsExpanded, id, updateNodeData]);
+
+  const onExpandDeps = useCallback(() => {
+    postMessage({
+      type: 'expandDependencies',
+      filePath: data.filePath,
+      nodeId: id,
+      categoryFilter,
+    });
+    updateNodeData(id, { depsExpanded: true });
+    setShowFilter(false);
+  }, [postMessage, data.filePath, id, categoryFilter, updateNodeData]);
 
   const onRemove = useCallback(() => {
     removeNodes([id]);
@@ -116,16 +130,19 @@ export const ContextFileNode = memo(function ContextFileNode({
         display: 'flex',
         gap: '6px',
       }}>
-        <button
-          type="button"
-          onClick={onExpandDeps}
-          style={{
-            ...actionBtnStyle,
-            ...(data.depsExpanded ? { color: COLOR_TEXT_SECONDARY, borderColor: COLOR_BORDER_SUBTLE } : {}),
-          }}
-        >
-          {data.depsExpanded ? 'Deps Expanded' : 'Expand Deps'}
-        </button>
+        <div style={{ position: 'relative' }}>
+          {showFilter && <DepFilterPopover onExpand={onExpandDeps} />}
+          <button
+            type="button"
+            onClick={toggleFilterPopover}
+            style={{
+              ...actionBtnStyle,
+              ...(data.depsExpanded ? { color: COLOR_TEXT_SECONDARY, borderColor: COLOR_BORDER_SUBTLE } : {}),
+            }}
+          >
+            {data.depsExpanded ? 'Deps Expanded' : 'Expand Deps'}
+          </button>
+        </div>
         <button
           type="button"
           onClick={toggleRedacted}

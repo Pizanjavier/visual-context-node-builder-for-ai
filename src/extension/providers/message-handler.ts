@@ -53,7 +53,7 @@ export function createMessageHandler(
 
       case 'expandDependencies':
         try {
-          const files = await expandDependencies(msg.filePath, new Set());
+          const files = await expandDependencies(msg.filePath, new Set(), msg.categoryFilter);
           webview.postMessage({
             type: 'dependencyFiles',
             parentNodeId: msg.nodeId,

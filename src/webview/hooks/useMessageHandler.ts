@@ -7,6 +7,8 @@ import { useExtensionBridge } from './useExtensionBridge';
 
 const NODE_OFFSET_X = 320;
 const NODE_OFFSET_Y = 220;
+const DEP_OFFSET_X = 400;
+const DEP_SPACING_Y = 180;
 
 /** Handles incoming messages from the extension host and updates the canvas. */
 export function useMessageHandler(): void {
@@ -49,9 +51,16 @@ export function useMessageHandler(): void {
         }
         case 'dependencyFiles': {
           const parentId = msg.parentNodeId;
+          const parentNode = useCanvasStore.getState().nodes.find((n) => n.id === parentId);
+          const parentX = parentNode?.position.x ?? 100;
+          const parentY = parentNode?.position.y ?? 100;
           const existing = new Set(getFilePaths());
-          for (const file of msg.files) {
-            if (existing.has(file.filePath)) continue;
+          const filesToAdd = msg.files.filter((f) => !existing.has(f.filePath));
+          const totalHeight = (filesToAdd.length - 1) * DEP_SPACING_Y;
+          const startY = parentY - totalHeight / 2;
+
+          for (let i = 0; i < filesToAdd.length; i++) {
+            const file = filesToAdd[i];
             existing.add(file.filePath);
             const count = nodeCount.current++;
             const childId = `file-${Date.now()}-${count}`;
@@ -59,8 +68,8 @@ export function useMessageHandler(): void {
               id: childId,
               type: 'contextFile',
               position: {
-                x: 100 + (count % 4) * NODE_OFFSET_X,
-                y: 100 + Math.floor(count / 4) * NODE_OFFSET_Y,
+                x: parentX + DEP_OFFSET_X,
+                y: startY + i * DEP_SPACING_Y,
               },
               data: file,
             });

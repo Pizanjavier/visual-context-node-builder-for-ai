@@ -105,14 +105,15 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 <body>
   <h3>Visual Context Builder</h3>
   <p>Map, prune, and bundle codebase context for AI coding assistants.</p>
-  <button class="primary" onclick="post('openCanvas')">Open Canvas</button>
-  <button class="secondary" onclick="post('addFiles')">Add Files to Context</button>
+  <button class="primary" id="btn-open">Open Canvas</button>
+  <button class="secondary" id="btn-add">Add Files to Context</button>
   <div class="shortcuts">
     <p>Right-click any file in Explorer to add it directly.</p>
   </div>
   <script nonce="${nonce}">
     const vscode = acquireVsCodeApi();
-    function post(type) { vscode.postMessage({ type }); }
+    document.getElementById('btn-open').addEventListener('click', () => vscode.postMessage({ type: 'openCanvas' }));
+    document.getElementById('btn-add').addEventListener('click', () => vscode.postMessage({ type: 'addFiles' }));
   </script>
 </body>
 </html>`;

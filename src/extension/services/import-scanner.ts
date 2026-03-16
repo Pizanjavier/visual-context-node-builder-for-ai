@@ -1,6 +1,8 @@
 import * as ts from 'typescript';
 import * as path from 'path';
 import * as fs from 'fs';
+import { resolveAliasedImport } from './path-resolver';
+import type { PathConfig } from './path-resolver';
 
 const TS_EXTENSIONS = ['.ts', '.tsx', '.js', '.jsx', '.mts', '.cts'];
 
@@ -15,6 +17,7 @@ export function scanImports(
   content: string,
   fileName: string,
   fileDir: string,
+  pathConfig?: PathConfig,
 ): ResolvedImport[] {
   const sourceFile = ts.createSourceFile(
     fileName,
@@ -26,19 +29,24 @@ export function scanImports(
   const imports: ResolvedImport[] = [];
 
   ts.forEachChild(sourceFile, (node) => {
-    // import ... from './foo'
-    if (ts.isImportDeclaration(node) && ts.isStringLiteral(node.moduleSpecifier)) {
+    if (
+      ts.isImportDeclaration(node) &&
+      ts.isStringLiteral(node.moduleSpecifier)
+    ) {
       const specifier = node.moduleSpecifier.text;
-      const resolved = resolveLocalImport(specifier, fileDir);
+      const resolved = resolveImport(specifier, fileDir, pathConfig);
       if (resolved) {
         imports.push({ specifier, resolvedPath: resolved });
       }
     }
 
-    // export ... from './foo'
-    if (ts.isExportDeclaration(node) && node.moduleSpecifier && ts.isStringLiteral(node.moduleSpecifier)) {
+    if (
+      ts.isExportDeclaration(node) &&
+      node.moduleSpecifier &&
+      ts.isStringLiteral(node.moduleSpecifier)
+    ) {
       const specifier = node.moduleSpecifier.text;
-      const resolved = resolveLocalImport(specifier, fileDir);
+      const resolved = resolveImport(specifier, fileDir, pathConfig);
       if (resolved) {
         imports.push({ specifier, resolvedPath: resolved });
       }
@@ -48,24 +56,39 @@ export function scanImports(
   return imports;
 }
 
-/** Resolve a relative import specifier to an absolute file path. */
-function resolveLocalImport(specifier: string, fromDir: string): string | undefined {
-  if (!specifier.startsWith('.')) return undefined;
+/** Resolve an import specifier: relative first, then aliases. */
+function resolveImport(
+  specifier: string,
+  fromDir: string,
+  pathConfig?: PathConfig,
+): string | undefined {
+  if (specifier.startsWith('.')) {
+    return resolveLocalImport(specifier, fromDir);
+  }
 
+  if (pathConfig) {
+    return resolveAliasedImport(specifier, pathConfig);
+  }
+
+  return undefined;
+}
+
+/** Resolve a relative import specifier to an absolute file path. */
+function resolveLocalImport(
+  specifier: string,
+  fromDir: string,
+): string | undefined {
   const basePath = path.resolve(fromDir, specifier);
 
-  // Try exact path first (has extension)
   if (path.extname(basePath) && fs.existsSync(basePath)) {
     return basePath;
   }
 
-  // Try adding extensions
   for (const ext of TS_EXTENSIONS) {
     const withExt = basePath + ext;
     if (fs.existsSync(withExt)) return withExt;
   }
 
-  // Try index file in directory
   for (const ext of TS_EXTENSIONS) {
     const indexFile = path.join(basePath, `index${ext}`);
     if (fs.existsSync(indexFile)) return indexFile;

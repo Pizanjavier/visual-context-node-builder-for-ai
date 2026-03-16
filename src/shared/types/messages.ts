@@ -1,5 +1,6 @@
 import type { ContextFileNodeData, PackageNodeData } from './nodes';
 import type { CanvasSnapshot, RecipeMeta } from './snapshot';
+import type { DependencyCategoryFilter } from './dependency-categories';
 
 // Extension -> Webview messages
 export type ExtensionToWebviewMessage =
@@ -18,7 +19,7 @@ export type WebviewToExtensionMessage =
   | { type: 'ready' }
   | { type: 'requestFile'; filePath: string }
   | { type: 'pickFiles' }
-  | { type: 'expandDependencies'; filePath: string; nodeId: string }
+  | { type: 'expandDependencies'; filePath: string; nodeId: string; categoryFilter: DependencyCategoryFilter }
   | { type: 'resolvePackage'; packageName: string }
   | { type: 'listPackages' }
   | { type: 'copyToClipboard'; text: string }
