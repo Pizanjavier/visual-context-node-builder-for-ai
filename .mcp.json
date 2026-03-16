@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "pencil": {
+      "type": "stdio",
+      "command": "/Users/javier/.antigravity/extensions/highagency.pencildev-0.6.32-universal/out/mcp-server-darwin-arm64",
+      "args": ["--app", "antigravity"],
+      "env": {}
+    },
+    "claude-in-chrome": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@anthropic-ai/claude-in-chrome-mcp"]
+    }
+  }
+}

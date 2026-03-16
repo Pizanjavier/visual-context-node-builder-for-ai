@@ -1,0 +1,82 @@
+{
+  "name": "visual-context-node-builder",
+  "displayName": "Visual Context Node Builder for AI",
+  "description": "Interactive infinite-canvas node graph for mapping codebase context for AI coding assistants",
+  "version": "0.2.1",
+  "publisher": "pizan",
+  "license": "MIT",
+  "icon": "icon.png",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Visualization",
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:vcnb.openCanvas",
+    "onCommand:vcnb.addToContext",
+    "onView:vcnb.welcome"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "vcnb.openCanvas",
+        "title": "Open Visual Context Builder",
+        "icon": "$(symbol-structure)"
+      },
+      {
+        "command": "vcnb.addToContext",
+        "title": "Add to Visual Context"
+      }
+    ],
+    "viewContainers": {
+      "activitybar": [
+        {
+          "id": "vcnb-sidebar",
+          "title": "Context Builder",
+          "icon": "media/icon-sidebar.svg"
+        }
+      ]
+    },
+    "views": {
+      "vcnb-sidebar": [
+        {
+          "id": "vcnb.welcome",
+          "name": "Context Builder",
+          "type": "webview"
+        }
+      ]
+    },
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "vcnb.addToContext",
+          "group": "navigation"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "build": "node esbuild.config.mjs",
+    "watch": "node esbuild.config.mjs --watch",
+    "test": "vitest run",
+    "package": "vsce package"
+  },
+  "dependencies": {
+    "@xyflow/react": "^12.4.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "typescript": "^5.9.3",
+    "zustand": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0",
+    "@types/vscode": "^1.85.0",
+    "esbuild": "^0.24.0",
+    "vitest": "^4.1.0"
+  }
+}

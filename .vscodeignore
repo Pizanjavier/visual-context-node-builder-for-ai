@@ -1,0 +1,15 @@
+src/
+node_modules/
+.git/
+.claude/
+designs/
+*.ts
+!dist/**/*.js
+tsconfig.json
+tsconfig*.json
+esbuild.config.mjs
+.vscode/
+.gitignore
+CLAUDE.md
+SPEC.md
+.mcp.json
