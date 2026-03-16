@@ -1,0 +1,499 @@
+{
+  "version": 1,
+  "name": "Canvas + Dependency Expansion + Export Pipeline",
+  "createdAt": "2026-03-16T20:00:00.000Z",
+  "intent": "Understand the core feature of the Visual Context Node Builder: how files are added to the canvas, how dependencies are expanded and filtered, how nodes are rendered and managed in state, and how the full context is built and exported as Markdown/XML. This covers the complete data flow from extension host (file reading, AST scanning, dependency resolution) through the message protocol to the React webview (canvas rendering, state management, export formatting).",
+  "nodes": [
+    {
+      "id": "sys-1",
+      "type": "systemInstruction",
+      "position": { "x": 0, "y": 0 },
+      "data": {
+        "text": "You are analyzing the core pipeline of a VS Code extension that builds visual context for AI. The pipeline has 3 layers:\n\n1. EXTENSION HOST — reads files, scans imports, resolves dependencies, extracts symbols\n2. MESSAGE PROTOCOL — typed postMessage bridge between extension and webview\n3. REACT WEBVIEW — React Flow canvas, Zustand stores, node components, export formatters\n\nFocus on data flow: how a file goes from disk → extension host → message → webview store → canvas node → export bundle."
+      }
+    },
+    {
+      "id": "note-architecture",
+      "type": "stickyNote",
+      "position": { "x": 0, "y": 250 },
+      "data": {
+        "text": "ARCHITECTURE OVERVIEW\n\nThe pipeline flows left-to-right:\n\n1. Extension host reads files and scans AST (import-scanner, symbol-extractor, dependency-graph)\n2. Results are sent via postMessage (messages.ts defines the protocol)\n3. useMessageHandler receives data and populates canvas-store\n4. Canvas.tsx renders React Flow with custom node components\n5. Toolbar triggers export via context-builder → format-markdown/format-xml\n\nKey gotcha: the webview runs in a sandboxed iframe — ALL file system access goes through the extension host via messages."
+      }
+    },
+    {
+      "id": "file-nodes-types",
+      "type": "contextFile",
+      "position": { "x": 400, "y": 600 },
+      "data": {
+        "filePath": "/Users/javier/Documents/Proyects/visual-context-node-builder-for-ai/src/shared/types/nodes.ts",
+        "fileName": "nodes.ts",
+        "relativePath": "src/shared/types/nodes.ts",
+        "symbols": [],
+        "selectedSymbols": [],
+        "redacted": false,
+        "content": ""
+      }
+    },
+    {
+      "id": "file-messages",
+      "type": "contextFile",
+      "position": { "x": 400, "y": 800 },
+      "data": {
+        "filePath": "/Users/javier/Documents/Proyects/visual-context-node-builder-for-ai/src/shared/types/messages.ts",
+        "fileName": "messages.ts",
+        "relativePath": "src/shared/types/messages.ts",
+        "symbols": [],
+        "selectedSymbols": [],
+        "redacted": false,
+        "content": ""
+      }
+    },
+    {
+      "id": "file-dep-categories",
+      "type": "contextFile",
+      "position": { "x": 400, "y": 1000 },
+      "data": {
+        "filePath": "/Users/javier/Documents/Proyects/visual-context-node-builder-for-ai/src/shared/types/dependency-categories.ts",
+        "fileName": "dependency-categories.ts",
+        "relativePath": "src/shared/types/dependency-categories.ts",
+        "symbols": [],
+        "selectedSymbols": [],
+        "redacted": false,
+        "content": ""
+      }
+    },
+    {
+      "id": "note-types",
+      "type": "stickyNote",
+      "position": { "x": 400, "y": 1180 },
+      "data": {
+        "text": "SHARED TYPES\n\nThese define the contract between extension host and webview. nodes.ts has ContextFileNodeData, FileSymbol, StickyNoteNodeData, etc. messages.ts defines all postMessage payloads. dependency-categories.ts defines filter categories (source, styles, data)."
+      }
+    },
+    {
+      "id": "file-path-resolver",
+      "type": "contextFile",
+      "position": { "x": 800, "y": 0 },
+      "data": {
+        "filePath": "/Users/javier/Documents/Proyects/visual-context-node-builder-for-ai/src/extension/services/path-resolver.ts",
+        "fileName": "path-resolver.ts",
+        "relativePath": "src/extension/services/path-resolver.ts",
+        "symbols": [],
+        "selectedSymbols": [],
+        "redacted": false,
+        "content": ""
+      }
+    },
+    {
+      "id": "file-symbol-extractor",
+      "type": "contextFile",
+      "position": { "x": 800, "y": 200 },
+      "data": {
+        "filePath": "/Users/javier/Documents/Proyects/visual-context-node-builder-for-ai/src/extension/services/symbol-extractor.ts",
+        "fileName": "symbol-extractor.ts",
+        "relativePath": "src/extension/services/symbol-extractor.ts",
+        "symbols": [],
+        "selectedSymbols": [],
+        "redacted": false,
+        "content": ""
+      }
+    },
+    {
+      "id": "file-file-reader",
+      "type": "contextFile",
+      "position": { "x": 800, "y": 400 },
+      "data": {
+        "filePath": "/Users/javier/Documents/Proyects/visual-context-node-builder-for-ai/src/extension/services/file-reader.ts",
+        "fileName": "file-reader.ts",
+        "relativePath": "src/extension/services/file-reader.ts",
+        "symbols": [],
+        "selectedSymbols": [],
+        "redacted": false,
+        "content": ""
+      }
+    },
+    {
+      "id": "file-import-scanner",
+      "type": "contextFile",
+      "position": { "x": 800, "y": 600 },
+      "data": {
+        "filePath": "/Users/javier/Documents/Proyects/visual-context-node-builder-for-ai/src/extension/services/import-scanner.ts",
+        "fileName": "import-scanner.ts",
+        "relativePath": "src/extension/services/import-scanner.ts",
+        "symbols": [],
+        "selectedSymbols": [],
+        "redacted": false,
+        "content": ""
+      }
+    },
+    {
+      "id": "file-category-filter",
+      "type": "contextFile",
+      "position": { "x": 800, "y": 800 },
+      "data": {
+        "filePath": "/Users/javier/Documents/Proyects/visual-context-node-builder-for-ai/src/shared/utils/category-filter.ts",
+        "fileName": "category-filter.ts",
+        "relativePath": "src/shared/utils/category-filter.ts",
+        "symbols": [],
+        "selectedSymbols": [],
+        "redacted": false,
+        "content": ""
+      }
+    },
+    {
+      "id": "file-dep-graph",
+      "type": "contextFile",
+      "position": { "x": 800, "y": 1000 },
+      "data": {
+        "filePath": "/Users/javier/Documents/Proyects/visual-context-node-builder-for-ai/src/extension/services/dependency-graph.ts",
+        "fileName": "dependency-graph.ts",
+        "relativePath": "src/extension/services/dependency-graph.ts",
+        "symbols": [],
+        "selectedSymbols": [],
+        "redacted": false,
+        "content": ""
+      }
+    },
+    {
+      "id": "note-extension",
+      "type": "stickyNote",
+      "position": { "x": 800, "y": 1200 },
+      "data": {
+        "text": "EXTENSION HOST SERVICES\n\nThis column is the backend brain:\n- path-resolver: resolves import specifiers to absolute file paths (handles aliases, barrel files)\n- symbol-extractor: uses TypeScript AST to extract functions, classes, types from files\n- file-reader: reads file from disk + runs symbol extraction\n- import-scanner: parses import statements from source code\n- category-filter: classifies imports as source/styles/data\n- dependency-graph: orchestrates the full dependency tree expansion"
+      }
+    },
+    {
+      "id": "file-message-handler",
+      "type": "contextFile",
+      "position": { "x": 1200, "y": 0 },
+      "data": {
+        "filePath": "/Users/javier/Documents/Proyects/visual-context-node-builder-for-ai/src/extension/providers/message-handler.ts",
+        "fileName": "message-handler.ts",
+        "relativePath": "src/extension/providers/message-handler.ts",
+        "symbols": [],
+        "selectedSymbols": [],
+        "redacted": false,
+        "content": ""
+      }
+    },
+    {
+      "id": "file-use-message-handler",
+      "type": "contextFile",
+      "position": { "x": 1200, "y": 200 },
+      "data": {
+        "filePath": "/Users/javier/Documents/Proyects/visual-context-node-builder-for-ai/src/webview/hooks/useMessageHandler.ts",
+        "fileName": "useMessageHandler.ts",
+        "relativePath": "src/webview/hooks/useMessageHandler.ts",
+        "symbols": [],
+        "selectedSymbols": [],
+        "redacted": false,
+        "content": ""
+      }
+    },
+    {
+      "id": "file-extension-bridge",
+      "type": "contextFile",
+      "position": { "x": 1200, "y": 400 },
+      "data": {
+        "filePath": "/Users/javier/Documents/Proyects/visual-context-node-builder-for-ai/src/webview/hooks/useExtensionBridge.ts",
+        "fileName": "useExtensionBridge.ts",
+        "relativePath": "src/webview/hooks/useExtensionBridge.ts",
+        "symbols": [],
+        "selectedSymbols": [],
+        "redacted": false,
+        "content": ""
+      }
+    },
+    {
+      "id": "note-bridge",
+      "type": "stickyNote",
+      "position": { "x": 1200, "y": 580 },
+      "data": {
+        "text": "MESSAGE BRIDGE\n\nmessage-handler.ts (extension side) routes incoming webview messages to the right service. useMessageHandler.ts (webview side) receives extension responses and updates the canvas store. useExtensionBridge.ts wraps the VS Code postMessage API."
+      }
+    },
+    {
+      "id": "file-canvas-store",
+      "type": "contextFile",
+      "position": { "x": 1600, "y": 0 },
+      "data": {
+        "filePath": "/Users/javier/Documents/Proyects/visual-context-node-builder-for-ai/src/webview/store/canvas-store.ts",
+        "fileName": "canvas-store.ts",
+        "relativePath": "src/webview/store/canvas-store.ts",
+        "symbols": [],
+        "selectedSymbols": [],
+        "redacted": false,
+        "content": ""
+      }
+    },
+    {
+      "id": "file-dep-filter-store",
+      "type": "contextFile",
+      "position": { "x": 1600, "y": 200 },
+      "data": {
+        "filePath": "/Users/javier/Documents/Proyects/visual-context-node-builder-for-ai/src/webview/store/dep-filter-store.ts",
+        "fileName": "dep-filter-store.ts",
+        "relativePath": "src/webview/store/dep-filter-store.ts",
+        "symbols": [],
+        "selectedSymbols": [],
+        "redacted": false,
+        "content": ""
+      }
+    },
+    {
+      "id": "file-canvas-sync",
+      "type": "contextFile",
+      "position": { "x": 1600, "y": 400 },
+      "data": {
+        "filePath": "/Users/javier/Documents/Proyects/visual-context-node-builder-for-ai/src/webview/hooks/useCanvasSync.ts",
+        "fileName": "useCanvasSync.ts",
+        "relativePath": "src/webview/hooks/useCanvasSync.ts",
+        "symbols": [],
+        "selectedSymbols": [],
+        "redacted": false,
+        "content": ""
+      }
+    },
+    {
+      "id": "file-canvas",
+      "type": "contextFile",
+      "position": { "x": 2000, "y": 0 },
+      "data": {
+        "filePath": "/Users/javier/Documents/Proyects/visual-context-node-builder-for-ai/src/webview/components/Canvas.tsx",
+        "fileName": "Canvas.tsx",
+        "relativePath": "src/webview/components/Canvas.tsx",
+        "symbols": [],
+        "selectedSymbols": [],
+        "redacted": false,
+        "content": ""
+      }
+    },
+    {
+      "id": "file-context-file-node",
+      "type": "contextFile",
+      "position": { "x": 2000, "y": 200 },
+      "data": {
+        "filePath": "/Users/javier/Documents/Proyects/visual-context-node-builder-for-ai/src/webview/components/nodes/ContextFileNode.tsx",
+        "fileName": "ContextFileNode.tsx",
+        "relativePath": "src/webview/components/nodes/ContextFileNode.tsx",
+        "symbols": [],
+        "selectedSymbols": [],
+        "redacted": false,
+        "content": ""
+      }
+    },
+    {
+      "id": "file-dep-filter-popover",
+      "type": "contextFile",
+      "position": { "x": 2000, "y": 400 },
+      "data": {
+        "filePath": "/Users/javier/Documents/Proyects/visual-context-node-builder-for-ai/src/webview/components/nodes/DepFilterPopover.tsx",
+        "fileName": "DepFilterPopover.tsx",
+        "relativePath": "src/webview/components/nodes/DepFilterPopover.tsx",
+        "symbols": [],
+        "selectedSymbols": [],
+        "redacted": false,
+        "content": ""
+      }
+    },
+    {
+      "id": "file-dep-edge",
+      "type": "contextFile",
+      "position": { "x": 2000, "y": 600 },
+      "data": {
+        "filePath": "/Users/javier/Documents/Proyects/visual-context-node-builder-for-ai/src/webview/components/edges/DependencyEdge.tsx",
+        "fileName": "DependencyEdge.tsx",
+        "relativePath": "src/webview/components/edges/DependencyEdge.tsx",
+        "symbols": [],
+        "selectedSymbols": [],
+        "redacted": false,
+        "content": ""
+      }
+    },
+    {
+      "id": "file-toolbar",
+      "type": "contextFile",
+      "position": { "x": 2000, "y": 800 },
+      "data": {
+        "filePath": "/Users/javier/Documents/Proyects/visual-context-node-builder-for-ai/src/webview/components/Toolbar.tsx",
+        "fileName": "Toolbar.tsx",
+        "relativePath": "src/webview/components/Toolbar.tsx",
+        "symbols": [],
+        "selectedSymbols": [],
+        "redacted": false,
+        "content": ""
+      }
+    },
+    {
+      "id": "note-canvas",
+      "type": "stickyNote",
+      "position": { "x": 2000, "y": 1000 },
+      "data": {
+        "text": "CANVAS & NODE COMPONENTS\n\nCanvas.tsx is the main React Flow wrapper. ContextFileNode is the primary node — shows file name, symbols with toggles, expand deps button, redact toggle. DepFilterPopover lets users pick which import categories to expand. Toolbar triggers export and provides canvas actions."
+      }
+    },
+    {
+      "id": "file-export-panel",
+      "type": "contextFile",
+      "position": { "x": 2400, "y": 0 },
+      "data": {
+        "filePath": "/Users/javier/Documents/Proyects/visual-context-node-builder-for-ai/src/webview/components/ExportPanel.tsx",
+        "fileName": "ExportPanel.tsx",
+        "relativePath": "src/webview/components/ExportPanel.tsx",
+        "symbols": [],
+        "selectedSymbols": [],
+        "redacted": false,
+        "content": ""
+      }
+    },
+    {
+      "id": "file-build-sections",
+      "type": "contextFile",
+      "position": { "x": 2400, "y": 200 },
+      "data": {
+        "filePath": "/Users/javier/Documents/Proyects/visual-context-node-builder-for-ai/src/webview/utils/build-sections.ts",
+        "fileName": "build-sections.ts",
+        "relativePath": "src/webview/utils/build-sections.ts",
+        "symbols": [],
+        "selectedSymbols": [],
+        "redacted": false,
+        "content": ""
+      }
+    },
+    {
+      "id": "file-context-builder",
+      "type": "contextFile",
+      "position": { "x": 2400, "y": 400 },
+      "data": {
+        "filePath": "/Users/javier/Documents/Proyects/visual-context-node-builder-for-ai/src/shared/utils/context-builder.ts",
+        "fileName": "context-builder.ts",
+        "relativePath": "src/shared/utils/context-builder.ts",
+        "symbols": [],
+        "selectedSymbols": [],
+        "redacted": false,
+        "content": ""
+      }
+    },
+    {
+      "id": "file-context-helpers",
+      "type": "contextFile",
+      "position": { "x": 2400, "y": 600 },
+      "data": {
+        "filePath": "/Users/javier/Documents/Proyects/visual-context-node-builder-for-ai/src/shared/utils/context-helpers.ts",
+        "fileName": "context-helpers.ts",
+        "relativePath": "src/shared/utils/context-helpers.ts",
+        "symbols": [],
+        "selectedSymbols": [],
+        "redacted": false,
+        "content": ""
+      }
+    },
+    {
+      "id": "file-format-md",
+      "type": "contextFile",
+      "position": { "x": 2400, "y": 800 },
+      "data": {
+        "filePath": "/Users/javier/Documents/Proyects/visual-context-node-builder-for-ai/src/shared/utils/format-markdown.ts",
+        "fileName": "format-markdown.ts",
+        "relativePath": "src/shared/utils/format-markdown.ts",
+        "symbols": [],
+        "selectedSymbols": [],
+        "redacted": false,
+        "content": ""
+      }
+    },
+    {
+      "id": "file-format-xml",
+      "type": "contextFile",
+      "position": { "x": 2400, "y": 1000 },
+      "data": {
+        "filePath": "/Users/javier/Documents/Proyects/visual-context-node-builder-for-ai/src/shared/utils/format-xml.ts",
+        "fileName": "format-xml.ts",
+        "relativePath": "src/shared/utils/format-xml.ts",
+        "symbols": [],
+        "selectedSymbols": [],
+        "redacted": false,
+        "content": ""
+      }
+    },
+    {
+      "id": "file-token-estimator",
+      "type": "contextFile",
+      "position": { "x": 2400, "y": 1200 },
+      "data": {
+        "filePath": "/Users/javier/Documents/Proyects/visual-context-node-builder-for-ai/src/shared/utils/token-estimator.ts",
+        "fileName": "token-estimator.ts",
+        "relativePath": "src/shared/utils/token-estimator.ts",
+        "symbols": [],
+        "selectedSymbols": [],
+        "redacted": false,
+        "content": ""
+      }
+    },
+    {
+      "id": "note-export",
+      "type": "stickyNote",
+      "position": { "x": 2400, "y": 1400 },
+      "data": {
+        "text": "EXPORT PIPELINE\n\nbuild-sections.ts converts canvas nodes into ordered ContextSections. context-builder.ts orchestrates the export. format-markdown.ts and format-xml.ts produce the final output. token-estimator.ts provides live token counts. The export includes intent, system instructions, notes, file contents (with symbol filtering), and relationship edges."
+      }
+    },
+    {
+      "id": "pkg-react-flow",
+      "type": "package",
+      "position": { "x": 2800, "y": 0 },
+      "data": {
+        "packageName": "@xyflow/react",
+        "version": "",
+        "typesContent": "",
+        "typesEntry": ""
+      }
+    },
+    {
+      "id": "pkg-zustand",
+      "type": "package",
+      "position": { "x": 2800, "y": 200 },
+      "data": {
+        "packageName": "zustand",
+        "version": "",
+        "typesContent": "",
+        "typesEntry": ""
+      }
+    }
+  ],
+  "edges": [
+    { "id": "edge-1", "source": "file-file-reader", "target": "file-symbol-extractor", "type": "dependency" },
+    { "id": "edge-2", "source": "file-import-scanner", "target": "file-path-resolver", "type": "dependency" },
+    { "id": "edge-3", "source": "file-dep-graph", "target": "file-import-scanner", "type": "dependency" },
+    { "id": "edge-4", "source": "file-dep-graph", "target": "file-file-reader", "type": "dependency" },
+    { "id": "edge-5", "source": "file-dep-graph", "target": "file-path-resolver", "type": "dependency" },
+    { "id": "edge-6", "source": "file-dep-graph", "target": "file-category-filter", "type": "dependency" },
+    { "id": "edge-7", "source": "file-message-handler", "target": "file-file-reader", "type": "dependency" },
+    { "id": "edge-8", "source": "file-message-handler", "target": "file-dep-graph", "type": "dependency" },
+    { "id": "edge-9", "source": "file-message-handler", "target": "file-messages", "type": "dependency" },
+    { "id": "edge-10", "source": "file-use-message-handler", "target": "file-canvas-store", "type": "dependency" },
+    { "id": "edge-11", "source": "file-use-message-handler", "target": "file-messages", "type": "dependency" },
+    { "id": "edge-12", "source": "file-canvas-sync", "target": "file-canvas-store", "type": "dependency" },
+    { "id": "edge-13", "source": "file-canvas", "target": "file-canvas-store", "type": "dependency" },
+    { "id": "edge-14", "source": "file-canvas", "target": "file-canvas-sync", "type": "dependency" },
+    { "id": "edge-15", "source": "file-canvas", "target": "file-context-file-node", "type": "dependency" },
+    { "id": "edge-16", "source": "file-canvas", "target": "file-dep-edge", "type": "dependency" },
+    { "id": "edge-17", "source": "file-context-file-node", "target": "file-canvas-store", "type": "dependency" },
+    { "id": "edge-18", "source": "file-context-file-node", "target": "file-dep-filter-store", "type": "dependency" },
+    { "id": "edge-19", "source": "file-context-file-node", "target": "file-dep-filter-popover", "type": "dependency" },
+    { "id": "edge-20", "source": "file-dep-filter-popover", "target": "file-dep-filter-store", "type": "dependency" },
+    { "id": "edge-21", "source": "file-context-builder", "target": "file-context-helpers", "type": "dependency" },
+    { "id": "edge-22", "source": "file-context-builder", "target": "file-format-md", "type": "dependency" },
+    { "id": "edge-23", "source": "file-context-builder", "target": "file-format-xml", "type": "dependency" },
+    { "id": "edge-24", "source": "file-format-md", "target": "file-context-helpers", "type": "dependency" },
+    { "id": "edge-25", "source": "file-format-xml", "target": "file-context-helpers", "type": "dependency" },
+    { "id": "edge-26", "source": "file-toolbar", "target": "file-canvas-store", "type": "dependency" },
+    { "id": "edge-27", "source": "file-toolbar", "target": "file-build-sections", "type": "dependency" },
+    { "id": "edge-28", "source": "file-toolbar", "target": "file-context-builder", "type": "dependency" },
+    { "id": "edge-29", "source": "file-messages", "target": "file-nodes-types", "type": "dependency" },
+    { "id": "edge-30", "source": "file-messages", "target": "file-dep-categories", "type": "dependency" },
+    { "id": "edge-31", "source": "file-category-filter", "target": "file-dep-categories", "type": "dependency" },
+    { "id": "edge-32", "source": "file-symbol-extractor", "target": "file-nodes-types", "type": "dependency" },
+    { "id": "edge-33", "source": "file-use-message-handler", "target": "file-extension-bridge", "type": "dependency" }
+  ]
+}
