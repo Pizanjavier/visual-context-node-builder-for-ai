@@ -2,7 +2,7 @@
   "name": "visual-context-node-builder",
   "displayName": "Visual Context Node Builder for AI",
   "description": "Interactive infinite-canvas node graph for mapping codebase context for AI coding assistants",
-  "version": "0.3.2",
+  "version": "0.4.0",
   "publisher": "pizan",
   "license": "MIT",
   "repository": {
