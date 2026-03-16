@@ -2,16 +2,33 @@
   "name": "visual-context-node-builder",
   "displayName": "Visual Context Node Builder for AI",
   "description": "Interactive infinite-canvas node graph for mapping codebase context for AI coding assistants",
-  "version": "0.3.0",
+  "version": "0.3.2",
   "publisher": "pizan",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Pizanjavier/visual-context-node-builder-for-ai"
+  },
   "icon": "icon.png",
   "engines": {
     "vscode": "^1.85.0"
   },
   "categories": [
     "Visualization",
+    "Machine Learning",
     "Other"
+  ],
+  "keywords": [
+    "ai",
+    "context",
+    "llm",
+    "node graph",
+    "prompt",
+    "chatgpt",
+    "claude",
+    "copilot",
+    "codebase",
+    "dependency graph"
   ],
   "activationEvents": [
     "onCommand:vcnb.openCanvas",
