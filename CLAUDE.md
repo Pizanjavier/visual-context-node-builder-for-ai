@@ -7,6 +7,10 @@ visually map, prune, and bundle their codebase as structured context for AI codi
 
 **Core values:** Privacy by Design · Anti-Cliché AI UI · Tactile & Responsive
 
+Key capabilities:
+- Manual context building via drag-and-drop, dependency expansion, and symbol selection
+- **Git-Aware Context Seeding** — analyze git diffs at the symbol level, auto-populate the canvas with changed files, and scan the entire workspace for reverse dependencies (see `SPEC.md` §4.4)
+
 See `SPEC.md` for full functional specification.
 
 ---
@@ -159,9 +163,9 @@ visual-context-node-builder-for-ai/
 ├── src/
 │   ├── extension/               # VS Code extension host
 │   │   ├── extension.ts         # Activation entry point
-│   │   ├── commands/            # Command handlers
+│   │   ├── commands/            # Command handlers (incl. seed-from-git)
 │   │   ├── providers/           # Webview providers
-│   │   └── services/            # Extension services
+│   │   └── services/            # Extension services (incl. git-seed pipeline)
 │   ├── webview/                 # React webview app
 │   │   ├── App.tsx
 │   │   ├── components/          # React components
@@ -184,3 +188,4 @@ visual-context-node-builder-for-ai/
 - React Flow handles its own internal state — sync carefully with Zustand, avoid double-source-of-truth.
 - AST parsing (import scanning) must be resilient — handle aliased imports, barrel files, dynamic imports gracefully (skip with a warning, don't crash).
 - Context bundles can get large — always include a token estimate in the export UI.
+- Git-seed pipeline: the workspace import index is cached in memory (`git-seed-orchestrator.ts`). Call `clearImportIndexCache()` if workspace files change significantly. The `ReverseDependencyMap` uses a plain `Record<string, ReverseDependency[]>` (not `Map`) because `Map` can't cross `postMessage`.

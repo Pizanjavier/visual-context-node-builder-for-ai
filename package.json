@@ -2,7 +2,7 @@
   "name": "visual-context-node-builder",
   "displayName": "Visual Context Node Builder for AI",
   "description": "Interactive infinite-canvas node graph for mapping codebase context for AI coding assistants",
-  "version": "0.4.0",
+  "version": "0.6.0",
   "publisher": "pizan",
   "license": "MIT",
   "repository": {
@@ -33,6 +33,7 @@
   "activationEvents": [
     "onCommand:vcnb.openCanvas",
     "onCommand:vcnb.addToContext",
+    "onCommand:vcnb.seedFromGit",
     "onView:vcnb.welcome"
   ],
   "main": "./dist/extension.js",
@@ -46,6 +47,11 @@
       {
         "command": "vcnb.addToContext",
         "title": "Add to Visual Context"
+      },
+      {
+        "command": "vcnb.seedFromGit",
+        "title": "VCNB: Seed Canvas from Git Changes",
+        "icon": "$(git-compare)"
       }
     ],
     "viewContainers": {

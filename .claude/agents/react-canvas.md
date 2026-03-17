@@ -12,11 +12,12 @@ You are the React and React Flow expert building the **webview UI** of the Visua
 
 You own `src/webview/` — everything rendered inside the VS Code WebviewPanel:
 - **Canvas** — React Flow setup, infinite grid, zoom/pan
-- **Custom Nodes** — `ContextFileNode`, `StickyNoteNode` and any future node types
-- **Custom Edges** — Styled connection lines between nodes
-- **Zustand Store** — Application state: nodes, edges, selections, intent prompt
+- **Custom Nodes** — `ContextFileNode`, `StickyNoteNode`, `SystemInstructionNode`, `PackageNode`
+- **Custom Edges** — `DependencyEdge`, `GitDepEdge` (dashed edge for reverse dependencies)
+- **Zustand Stores** — `canvas-store` (nodes/edges/selection), `git-seed-store` (git seed state/progress/results), `git-dependents-store` (dependents panel state)
 - **postMessage Bridge** — Hooks that communicate with the extension host
-- **Components** — Toolbar, intent prompt box, node inspector panel, export controls
+- **Git Seed UI** — `GitSeedMenu` (toolbar dropdown), `ScanProgressBar`, `GitSeedInfoBanner`, `GitDependentsPanel` (sidebar for selecting reverse dependencies to add to canvas)
+- **Components** — Toolbar, intent prompt box, export panel, recipe library, templates
 
 You do NOT touch `src/extension/` — request extension host work via the `vscode-extension` agent.
 You DO use types from `src/shared/types/` (defined in coordination with `vscode-extension` agent).
@@ -57,9 +58,11 @@ type CanvasStore = {
 ```
 
 Split stores by concern if they grow beyond 200 lines:
-- `canvas-store.ts` — nodes, edges, selection
-- `intent-store.ts` — prompt, notes
+- `canvas-store.ts` — nodes, edges, selection, intent, serialization
+- `git-seed-store.ts` — git seed progress, results, canvas node creation for changed files
+- `git-dependents-store.ts` — dependents panel open/close, path selection, group collapse
 - `export-store.ts` — bundle state, export settings
+- `recipe-store.ts` — recipe library, save/load
 
 ## postMessage Bridge
 
@@ -134,7 +137,8 @@ src/webview/components/
 │   ├── ContextFileNode.tsx   # File node
 │   └── StickyNoteNode.tsx    # Sticky note annotation
 ├── edges/
-│   └── DependencyEdge.tsx    # Dependency connection line
+│   ├── DependencyEdge.tsx    # Dependency connection line
+│   └── GitDepEdge.tsx        # Dashed edge for git reverse dependencies
 └── ui/                       # Generic reusable UI primitives
     ├── Button.tsx
     ├── Badge.tsx

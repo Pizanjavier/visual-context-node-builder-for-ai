@@ -3,6 +3,22 @@ import type { ContextFileNodeData, PackageNodeData } from '../types/nodes';
 export type FileEntry = { id: string; data: ContextFileNodeData };
 export type EdgeEntry = { source: string; target: string };
 
+/** Summary of git changes for the export context. */
+export type GitChangeSummary = {
+  sourceDescription: string;
+  changedFiles: Array<{
+    relativePath: string;
+    status: 'added' | 'modified' | 'deleted' | 'renamed';
+    changedSymbols: string[];
+  }>;
+  /** Impact grouped by changed symbol: which files consume each changed symbol. */
+  impactedSymbols: Array<{
+    symbolName: string;
+    sourceFile: string;
+    usedBy: Array<{ relativePath: string; line: number }>;
+  }>;
+};
+
 /** A section of ordered context for the prompt workbench. */
 export type ContextSection =
   | { kind: 'systemInstruction'; text: string; sortKey: number }
@@ -10,7 +26,8 @@ export type ContextSection =
   | { kind: 'note'; text: string; sortKey: number }
   | { kind: 'file'; data: ContextFileNodeData; id: string; sortKey: number }
   | { kind: 'package'; data: PackageNodeData; sortKey: number }
-  | { kind: 'relationships'; edges: EdgeEntry[]; nodes: FileEntry[]; sortKey: number };
+  | { kind: 'relationships'; edges: EdgeEntry[]; nodes: FileEntry[]; sortKey: number }
+  | { kind: 'gitSummary'; summary: GitChangeSummary; sortKey: number };
 
 /** Get filtered content based on selected symbols and redaction state. */
 export function getFilteredContent(data: ContextFileNodeData): string {

@@ -32,6 +32,31 @@ Pre-built instruction sets for common tasks: **Code Review**, **Refactor**, **Bu
 ### Recipes
 Save your canvas layouts as reusable recipes. Next time you need the same context setup, load it in one click instead of rebuilding from scratch.
 
+### Git-Aware Context Seeding
+
+**The fastest way to build context from what actually changed.** Click **Seed from Git** and choose staged changes, unstaged changes, or any commit. The extension:
+
+1. Parses the diff and identifies exactly which **symbols** (functions, types, classes) were added, modified, or deleted — not just which lines changed.
+2. Scans your entire workspace for **reverse dependencies** — every file that imports or uses a changed symbol, with line numbers.
+3. Populates the canvas automatically with color-coded nodes (green = added, amber = modified, red = deleted) and highlights changed symbols with orange dots.
+4. Opens a **Dependents Panel** where you can selectively add consuming files, with dependency edges auto-drawn.
+5. Includes a structured **Git Diff Summary** and **Impact Analysis** in the exported context.
+
+**Why this is better than pasting a diff:**
+
+| | Raw `git diff` | Git Seed Context |
+|---|---|---|
+| Granularity | Line-level hunks with ~3 lines of context | Symbol-level: knows *which functions* changed |
+| Blast radius | None — you guess what's affected | Full impact analysis: every file consuming each changed symbol |
+| File content | Disconnected hunks | Complete file content with symbol selection |
+| Effort | Manual copy-paste | One click |
+
+**Use cases:**
+- **Code review prep** — seed from staged changes, get every changed file + every consumer on the canvas instantly
+- **Bug fix context** — seed from the breaking commit, see the full function and all its call sites
+- **Refactoring impact** — seed from unstaged changes, the reverse dependency scanner finds consumers in directories you'd never think to check
+- **PR descriptions** — generate context from the seeded canvas and paste the structured summary straight into the PR
+
 ### Live Token Estimation
 A running token count updates as you add, remove, or modify nodes. Know exactly how much context you're sending before you send it.
 

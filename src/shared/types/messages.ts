@@ -1,6 +1,7 @@
 import type { ContextFileNodeData, PackageNodeData } from './nodes';
 import type { CanvasSnapshot, RecipeMeta } from './snapshot';
 import type { DependencyCategoryFilter } from './dependency-categories';
+import type { GitDiffSource, GitSeedResult, GitSeedProgress } from './git';
 
 // Extension -> Webview messages
 export type ExtensionToWebviewMessage =
@@ -12,7 +13,9 @@ export type ExtensionToWebviewMessage =
   | { type: 'error'; message: string }
   | { type: 'recipeList'; recipes: RecipeMeta[] }
   | { type: 'recipeLoaded'; snapshot: CanvasSnapshot }
-  | { type: 'recipeSaved'; name: string };
+  | { type: 'recipeSaved'; name: string }
+  | { type: 'gitSeedResult'; result: GitSeedResult }
+  | { type: 'gitSeedProgress'; progress: GitSeedProgress };
 
 // Webview -> Extension messages
 export type WebviewToExtensionMessage =
@@ -27,7 +30,9 @@ export type WebviewToExtensionMessage =
   | { type: 'saveRecipe'; snapshot: CanvasSnapshot }
   | { type: 'loadRecipe'; fileName: string }
   | { type: 'listRecipes' }
-  | { type: 'deleteRecipe'; fileName: string };
+  | { type: 'deleteRecipe'; fileName: string }
+  | { type: 'requestGitSeed'; source: GitDiffSource }
+  | { type: 'requestGitSeedFromCommit' };
 
 /** Union of all messages between extension host and webview. */
 export type Message = ExtensionToWebviewMessage | WebviewToExtensionMessage;

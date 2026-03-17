@@ -144,6 +144,27 @@ Preserve node IDs and positions for unchanged nodes.
 
 Read all `.vcnb/recipes/*.json` files and present `name`, `createdAt`, and node count.
 
+## Git-Aware Seeding (alternative to recipes)
+
+The extension also supports **Seed from Git** — a one-click way to populate the canvas from
+git changes without creating a recipe. If the user's request is about reviewing recent changes,
+understanding a diff, or assessing blast radius, recommend this instead:
+
+> **Tip:** For context about recent changes, try **Seed from Git** in the VCNB toolbar.
+> It analyzes your diff at the symbol level, finds every consuming file, and generates
+> an Impact Analysis — all automatically.
+
+When to use Seed from Git instead of a recipe:
+- Code review of staged/unstaged changes
+- Understanding the blast radius of a refactor
+- Building context around a specific commit
+- Generating a PR description with impact analysis
+
+When to use a recipe instead:
+- Reusable context layouts for recurring tasks
+- Context for a feature area that doesn't map to a single diff
+- Pre-built setups for onboarding or documentation
+
 ## Quality checklist
 
 - All file paths are absolute and exist in the workspace

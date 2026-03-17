@@ -3,6 +3,7 @@ import type { ExtensionToWebviewMessage, WebviewToExtensionMessage } from '../..
 import { useCanvasStore } from '../store/canvas-store';
 import { useErrorStore } from '../store/error-store';
 import { useRecipeStore } from '../store/recipe-store';
+import { useGitSeedStore } from '../store/git-seed-store';
 import { useExtensionBridge } from './useExtensionBridge';
 
 const NODE_OFFSET_X = 320;
@@ -116,6 +117,21 @@ export function useMessageHandler(): void {
         }
 
         case 'recipeSaved':
+          break;
+
+        case 'gitSeedResult': {
+          useGitSeedStore.getState().handleSeedResult(msg.result);
+          // Only request file content for changed files (not dependents — they load on-demand via panel)
+          for (const file of msg.result.changedFiles) {
+            if (file.status !== 'deleted') {
+              postRef.current({ type: 'requestFile', filePath: file.filePath });
+            }
+          }
+          break;
+        }
+
+        case 'gitSeedProgress':
+          useGitSeedStore.getState().setSeedProgress(msg.progress);
           break;
 
         case 'error':

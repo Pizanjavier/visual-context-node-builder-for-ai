@@ -4,6 +4,8 @@ import { readFileAsNodeData } from '../services/file-reader';
 import { expandDependencies } from '../services/dependency-graph';
 import { resolvePackageTypes } from '../services/package-resolver';
 import { handleRecipeMessage } from './recipe-handler';
+import { executeGitSeed } from '../services/git-seed-orchestrator';
+import { showCommitPickerAndSeed } from '../commands/seed-from-git';
 
 /** Handles messages from the webview and responds via the webview panel. */
 export function createMessageHandler(
@@ -109,6 +111,36 @@ export function createMessageHandler(
             Buffer.from(msg.content, 'utf-8'),
           );
           vscode.window.showInformationMessage(`Saved to ${uri.fsPath}`);
+        }
+        break;
+      }
+
+      case 'requestGitSeedFromCommit': {
+        showCommitPickerAndSeed(webview);
+        break;
+      }
+
+      case 'requestGitSeed': {
+        const wsRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+        if (!wsRoot) {
+          webview.postMessage({ type: 'error', message: 'No workspace folder open.' });
+          break;
+        }
+        try {
+          const result = await executeGitSeed(
+            msg.source,
+            wsRoot,
+            (step, percent) => {
+              webview.postMessage({
+                type: 'gitSeedProgress',
+                progress: { step, percent },
+              });
+            },
+          );
+          webview.postMessage({ type: 'gitSeedResult', result });
+        } catch (err: unknown) {
+          const message = err instanceof Error ? err.message : 'Unknown error';
+          webview.postMessage({ type: 'error', message: `Git seed failed: ${message}` });
         }
         break;
       }

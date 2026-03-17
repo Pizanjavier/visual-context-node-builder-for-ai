@@ -37,6 +37,25 @@ export function buildMarkdownOrdered(sections: ContextSection[]): string {
       case 'package':
         p.push(`### ${s.data.packageName} (v${s.data.version})\n\n\`\`\`typescript\n${s.data.typesContent}\n\`\`\``);
         break;
+      case 'gitSummary': {
+        const lines: string[] = [`## Git Diff Summary\nSource: ${s.summary.sourceDescription}\n`];
+        lines.push('### Changed Symbols');
+        for (const f of s.summary.changedFiles) {
+          const syms = f.changedSymbols.length > 0
+            ? f.changedSymbols.join(', ')
+            : '(no symbols — non-code file)';
+          lines.push(`- \`${f.relativePath}\` (${f.status}): ${syms}`);
+        }
+        if (s.summary.impactedSymbols.length > 0) {
+          lines.push('\n### Impact Analysis');
+          for (const sym of s.summary.impactedSymbols) {
+            lines.push(`- \`${sym.symbolName}\` (from \`${sym.sourceFile}\`) is used by:`);
+            for (const u of sym.usedBy) lines.push(`  - ${u.relativePath}:${u.line}`);
+          }
+        }
+        p.push(lines.join('\n'));
+        break;
+      }
       case 'relationships': {
         const rels = resolveRelationships(s.nodes, s.edges);
         if (rels.length > 0) p.push(`## Relationships\n\n${rels.map((r) => `- ${r}`).join('\n')}`);

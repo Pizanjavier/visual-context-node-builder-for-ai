@@ -13,8 +13,12 @@ You are the code analysis and context bundling expert for the **Visual Context N
 - **Import scanner** — Extract `import`/`require` statements, resolve to workspace files
 - **Symbol extractor** — List exported functions, classes, types from a file
 - **Dependency graph** — Build a directed graph of file relationships
+- **Reverse dependency scanner** — Build a workspace-wide import index and find all consumers of a given symbol (`src/extension/services/reverse-dep-scanner.ts`)
+- **Diff parser** — Parse raw `git diff` output into structured per-file hunks, map changed line ranges to AST symbols (`src/extension/services/diff-parser.ts`)
+- **Git reader** — Execute git commands (diff, log, file-at-ref) via child process (`src/extension/services/git-reader.ts`)
+- **Git-seed orchestrator** — Pipeline coordinator: diff → parse → symbols → reverse deps, with progress callbacks (`src/extension/services/git-seed-orchestrator.ts`)
 - **Redaction engine** — Replace marked content with `[REDACTED FOR PRIVACY]`
-- **Bundle serializer** — Convert the node graph into structured Markdown or XML
+- **Bundle serializer** — Convert the node graph into structured Markdown or XML, including Git Diff Summary and Impact Analysis sections
 - **Token estimator** — Approximate token count for the final bundle
 
 Primary locations:
@@ -152,6 +156,7 @@ export async function buildGraph(
 
 - **Never block the extension host main thread** — wrap TS compiler calls in `setImmediate` or worker threads for large files
 - **Cache parsed ASTs** — key by `(uri, mtime)` to avoid reparsing unchanged files
+- **Cache workspace import index** — the git-seed orchestrator caches the import index in memory; call `clearImportIndexCache()` when workspace files change significantly
 - **Bail out at 500 files** — scanning more than 500 files for a single node's deps is a bug, not a feature; warn the user
 - **Max bundle size** — warn (not block) when estimated tokens exceed 100k
 

@@ -60,6 +60,26 @@ export function buildXmlOrdered(sections: ContextSection[]): string {
         p.push(`    <![CDATA[${escapeCdata(s.data.typesContent)}]]>`);
         p.push('  </package>');
         break;
+      case 'gitSummary': {
+        p.push(`  <git-diff-summary source="${esc(s.summary.sourceDescription)}">`);
+        p.push('    <changed-files>');
+        for (const f of s.summary.changedFiles) {
+          const syms = f.changedSymbols.length > 0 ? f.changedSymbols.join(', ') : '';
+          p.push(`      <file path="${esc(f.relativePath)}" status="${f.status}" symbols="${esc(syms)}" />`);
+        }
+        p.push('    </changed-files>');
+        if (s.summary.impactedSymbols.length > 0) {
+          p.push('    <impact-analysis>');
+          for (const sym of s.summary.impactedSymbols) {
+            p.push(`      <symbol name="${esc(sym.symbolName)}" source="${esc(sym.sourceFile)}">`);
+            for (const u of sym.usedBy) p.push(`        <used-by path="${esc(u.relativePath)}" line="${u.line}" />`);
+            p.push('      </symbol>');
+          }
+          p.push('    </impact-analysis>');
+        }
+        p.push('  </git-diff-summary>');
+        break;
+      }
       case 'relationships': {
         const rels = resolveRelationships(s.nodes, s.edges);
         if (rels.length > 0) {

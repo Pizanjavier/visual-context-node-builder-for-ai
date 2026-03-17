@@ -10,6 +10,7 @@ import {
   addEdge,
 } from '@xyflow/react';
 import type { CanvasSnapshot } from '../../shared/types/snapshot';
+import { useGitSeedStore } from './git-seed-store';
 
 export type CanvasState = {
   nodes: Node[];
@@ -87,6 +88,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
 
   clearCanvas: () => {
     set({ nodes: [], edges: [], selectedNodeIds: [], intent: '' });
+    useGitSeedStore.getState().clearSeed();
   },
 
   getFilePaths: () => {

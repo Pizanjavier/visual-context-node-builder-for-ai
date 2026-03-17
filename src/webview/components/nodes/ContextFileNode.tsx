@@ -23,6 +23,21 @@ import {
   COLOR_BORDER_SUBTLE,
 } from '../../theme/tokens';
 
+const GIT_BORDER_COLORS: Record<string, string> = {
+  modified: '#d97706',
+  added: '#16a34a',
+  deleted: '#dc2626',
+  renamed: '#d97706',
+};
+
+const changedDotStyle: React.CSSProperties = {
+  width: '6px',
+  height: '6px',
+  borderRadius: '50%',
+  backgroundColor: '#d97706',
+  flexShrink: 0,
+};
+
 type Props = NodeProps & { data: ContextFileNodeData };
 
 /** A node representing a source code file with selectable symbols. */
@@ -76,6 +91,9 @@ export const ContextFileNode = memo(function ContextFileNode({
     [id, data.selectedSymbols, updateNodeData],
   );
 
+  const gitBorderColor = data.changeType ? GIT_BORDER_COLORS[data.changeType] : undefined;
+  const isDeleted = data.changeType === 'deleted';
+
   const style: React.CSSProperties = {
     ...nodeStyle,
     ...(selected ? {
@@ -83,6 +101,8 @@ export const ContextFileNode = memo(function ContextFileNode({
       boxShadow: `0 0 0 1.5px ${COLOR_ACCENT}, 0 2px 8px rgba(0,0,0,0.6)`,
     } : {}),
     ...(data.redacted ? { borderLeft: `3px solid ${COLOR_DANGER}` } : {}),
+    ...(gitBorderColor ? { borderLeft: `3px solid ${gitBorderColor}` } : {}),
+    ...(isDeleted ? { opacity: 0.6 } : {}),
   };
 
   return (
@@ -91,7 +111,7 @@ export const ContextFileNode = memo(function ContextFileNode({
 
       <div style={{ ...headerStyle, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={fileNameStyle}>
-          {data.redacted ? <s>{data.fileName}</s> : data.fileName}
+          {data.redacted || isDeleted ? <s>{data.fileName}</s> : data.fileName}
         </div>
         <button type="button" onClick={onRemove} style={closeBtnStyle}>
           &times;
@@ -104,23 +124,27 @@ export const ContextFileNode = memo(function ContextFileNode({
       {data.symbols.length > 0 && (
         <div style={{ borderTop: `1px solid ${COLOR_BORDER}`, paddingBottom: '6px' }}>
           <div style={sectionLabelStyle}>EXPORTED SYMBOLS</div>
-          {data.symbols.map((sym) => (
-            <label key={sym.name} style={symbolRowStyle}>
-              <input
-                type="checkbox"
-                checked={data.selectedSymbols.includes(sym.name)}
-                onChange={() => toggleSymbol(sym.name)}
-                style={{ accentColor: COLOR_ACCENT, cursor: 'pointer' }}
-              />
-              <span style={kindBadgeStyle}>{sym.kind.slice(0, 3)}</span>
-              <span style={{
-                textDecoration: data.redacted ? 'line-through' : 'none',
-                color: sym.exported ? COLOR_TEXT_PRIMARY : COLOR_TEXT_SECONDARY,
-              }}>
-                {sym.name}
-              </span>
-            </label>
-          ))}
+          {data.symbols.map((sym) => {
+            const isChanged = data.changedSymbolNames?.includes(sym.name) ?? false;
+            return (
+              <label key={sym.name} style={symbolRowStyle}>
+                <input
+                  type="checkbox"
+                  checked={data.selectedSymbols.includes(sym.name)}
+                  onChange={() => toggleSymbol(sym.name)}
+                  style={{ accentColor: COLOR_ACCENT, cursor: 'pointer' }}
+                />
+                <span style={kindBadgeStyle}>{sym.kind.slice(0, 3)}</span>
+                {isChanged && <span style={changedDotStyle} />}
+                <span style={{
+                  textDecoration: data.redacted ? 'line-through' : 'none',
+                  color: sym.exported ? COLOR_TEXT_PRIMARY : COLOR_TEXT_SECONDARY,
+                }}>
+                  {sym.name}
+                </span>
+              </label>
+            );
+          })}
         </div>
       )}
 

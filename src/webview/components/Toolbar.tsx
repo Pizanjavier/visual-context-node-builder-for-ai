@@ -8,6 +8,7 @@ import { formatTokenCount } from '../../shared/utils/token-estimator';
 import { buildMarkdownOrdered, buildXmlOrdered } from '../../shared/utils/context-builder';
 import { buildSections } from '../utils/build-sections';
 import { TemplateDropdown } from './TemplateDropdown';
+import { GitSeedMenu } from './GitSeedMenu';
 import { useConfirmStore } from './ConfirmModal';
 import { useHelpStore } from '../store/help-store';
 
@@ -169,6 +170,7 @@ export function Toolbar(): React.ReactElement {
       <button style={buttonStyle} type="button" onClick={openSave} data-tip="save">
         Save
       </button>
+      <GitSeedMenu />
       <button style={generateButton} type="button" onClick={onGenerate} data-tip="generate">
         Generate Context
       </button>

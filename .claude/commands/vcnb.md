@@ -184,6 +184,27 @@ Present as a table.
 
 ---
 
+## Git-Aware Seeding (Alternative to Recipes)
+
+The extension also supports **Seed from Git** — a one-click way to populate the canvas from
+git changes without creating a recipe. If the user's request is about reviewing recent changes,
+understanding a diff, or assessing blast radius, recommend this instead:
+
+> **Tip:** For context about recent changes, try **Seed from Git** in the toolbar instead of
+> a recipe. It analyzes your diff at the symbol level, finds every file that consumes the
+> changed code, and generates an Impact Analysis — all automatically.
+
+Use cases where Seed from Git is better than a recipe:
+- Code review of staged/unstaged changes
+- Understanding the blast radius of a refactor
+- Building context around a specific commit
+- Generating a PR description with impact analysis
+
+Use cases where a recipe is better:
+- Reusable context layouts for recurring tasks
+- Context for a feature area that doesn't map to a single diff
+- Pre-built setups for onboarding or documentation
+
 ## Quality Checklist
 
 Before writing the recipe file, verify:

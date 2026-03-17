@@ -75,6 +75,7 @@ Before declaring a task complete:
 **Architecture:**
 - Extension host (Node.js/TypeScript) ↔ Webview (React) via `postMessage`
 - React Flow for the canvas, Zustand for state, custom AST scanner for dependencies
+- Git-seed pipeline: diff parsing → symbol extraction → reverse dependency scanning → canvas population
 - Pencil for UI design prototyping
 
 **Design north star:** Professional engineering tool aesthetic — think Blender node editor or electrical blueprint, NOT a consumer AI chat app.
@@ -84,7 +85,9 @@ Before declaring a task complete:
 - `CLAUDE.md` — project conventions and agent roster
 - `src/extension/extension.ts` — activation entry point
 - `src/webview/App.tsx` — webview root
-- `src/shared/types/` — shared TypeScript types
+- `src/shared/types/` — shared TypeScript types (incl. `git.ts` for git-seed types)
+- `src/extension/services/git-seed-orchestrator.ts` — git-seed pipeline entry point
+- `src/extension/commands/seed-from-git.ts` — command registration and commit picker
 
 ## Communication Style
 

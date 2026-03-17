@@ -12,6 +12,9 @@ import { ErrorToast } from './components/ErrorToast';
 import { HelpPanel } from './components/HelpPanel';
 import { EmptyCanvasHints } from './components/EmptyCanvasHints';
 import { TooltipGuide } from './components/TooltipGuide';
+import { GitSeedInfoBanner } from './components/GitSeedInfoBanner';
+import { ScanProgressBar } from './components/ScanProgressBar';
+import { GitDependentsPanel } from './components/GitDependentsPanel';
 import { useMessageHandler } from './hooks/useMessageHandler';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { useStatePersistence } from './hooks/useStatePersistence';
@@ -37,7 +40,10 @@ export function App(): React.ReactElement {
       <ReactFlowProvider>
         <div style={appStyle}>
           <Toolbar />
+          <ScanProgressBar />
+          <GitSeedInfoBanner />
           <Canvas />
+          <GitDependentsPanel />
           <IntentPrompt />
           <ExportPanel />
           <RecipeLibrary />

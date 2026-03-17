@@ -20,6 +20,12 @@ export type ContextFileNodeData = {
   content: string;
   /** Whether dependencies have been expanded for this node. */
   depsExpanded?: boolean;
+  /** Set when this node was added via git-seed. */
+  gitSeeded?: boolean;
+  /** Change type if this file was part of a git diff. */
+  changeType?: 'added' | 'modified' | 'deleted' | 'renamed';
+  /** Symbol names that were changed in the git diff. */
+  changedSymbolNames?: string[];
 };
 
 /** Data payload for a StickyNoteNode. */

@@ -15,6 +15,7 @@ import { StickyNoteNode } from './nodes/StickyNoteNode';
 import { SystemInstructionNode } from './nodes/SystemInstructionNode';
 import { PackageNode } from './nodes/PackageNode';
 import { DependencyEdge } from './edges/DependencyEdge';
+import { GitDepEdge } from './edges/GitDepEdge';
 import {
   GRID_GAP, COLOR_BORDER, COLOR_BG_SURFACE, COLOR_ACCENT,
   COLOR_MINIMAP_BG, COLOR_MINIMAP_MASK,
@@ -46,7 +47,7 @@ export function Canvas(): React.ReactElement {
   );
 
   const edgeTypes = useMemo(
-    () => ({ dependency: DependencyEdge }),
+    () => ({ dependency: DependencyEdge, gitDependency: GitDepEdge }),
     [],
   );
 

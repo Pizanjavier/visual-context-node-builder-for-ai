@@ -107,7 +107,14 @@ The core canvas element. Must show:
 - Large, clean, placeholder text: "Describe what you want the AI to do with this context..."
 - Character/token counter
 
-### 5. Export Panel (slide-in or modal)
+### 5. Git Seed UI Components
+- **GitSeedMenu** — toolbar dropdown with Staged / Unstaged / Pick Commit options, accent-bordered
+- **ScanProgressBar** — slim 3px amber progress bar with step label and cancel button, shown during git-seed scanning
+- **GitSeedInfoBanner** — dismissible info bar after seed completion showing file/symbol/dependent counts, with clickable dependent link
+- **GitDependentsPanel** — right-side panel listing reverse dependencies grouped by directory, with checkboxes, select all, and "Add to Canvas" action
+- **ContextFileNode git states** — green/amber/red left borders for added/modified/deleted, orange dot badges next to changed symbols, strikethrough for deleted files
+
+### 6. Export Panel (slide-in or modal)
 - Preview of bundle format (Markdown tab, XML tab)
 - Token count
 - Actions: Copy to Clipboard, Save to File
